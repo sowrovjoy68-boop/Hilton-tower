@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HILTON TOWER Management V3.3</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f2f5f3;color:#24372e;font-family:Arial,sans-serif}
+header{background:#173d35;color:white;padding:21px}header h2{margin:0;font-size:21px}header p{color:#cce0d6;margin:7px 0 0}
+.layout{display:flex;min-height:90vh}nav{width:230px;background:#fff;padding:14px;flex-shrink:0}
+nav button{display:block;width:100%;padding:11px;margin:0 0 6px;border:0;background:#edf3ef;border-radius:6px;text-align:left;cursor:pointer;color:#24463a}
+nav button.active,nav button:hover{background:#dcece3;font-weight:bold}main{flex:1;padding:22px;min-width:0}
+button{cursor:pointer}.primary{background:#176548;color:white;border:0;padding:10px 15px;border-radius:6px;margin:5px 3px 5px 0}
+.secondary{background:#e5eee8;border:0;padding:8px 11px;border-radius:6px;margin:2px}.danger{background:#a83232;color:white;border:0;padding:8px 10px;border-radius:5px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px}
+.card,.panel{background:white;border-radius:10px;padding:17px;margin-bottom:14px;box-shadow:0 2px 8px #00000008}
+.card small{color:#738078}.card h2{color:#176548;margin:8px 0 0;font-size:22px}
+input,select{padding:10px;border:1px solid #cbd8d0;border-radius:6px;margin:5px;width:95%;max-width:320px;background:white}
+table{border-collapse:collapse;width:100%;min-width:650px}th,td{padding:10px;border-bottom:1px solid #e6ece8;text-align:left;font-size:13px}th{background:#edf3ef}
+.table-wrap{overflow-x:auto}.hidden{display:none}.actions{display:flex;gap:5px;flex-wrap:wrap}
+label{font-size:13px;font-weight:bold}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:7px}
+.hint{font-size:13px;color:#68776f}.note{background:#eef5f0;padding:10px;border-radius:7px;font-size:13px}.member-photo{width:58px;height:58px;object-fit:cover;border-radius:50%;border:2px solid #dce8e0}.doc-list{font-size:12px;line-height:1.8}.file-input{display:block;width:100%;max-width:360px}.preview{display:flex;align-items:center;gap:12px;margin:8px 0}
+@media(max-width:760px){.layout{display:block}nav{width:100%;display:flex;flex-wrap:wrap;gap:5px}nav button{width:auto;margin:0}main{padding:12px}}
+@media print{body:has(#reports:not(.hidden)) main>section:not(#reports){display:none!important}nav,.primary,.secondary,.danger,header p{display:none!important}.layout{display:block}main{padding:0}.hidden{display:none!important}.panel,.card{box-shadow:none}}
+
+#loginGate{position:fixed;inset:0;z-index:99999;background:#f2f5f3;display:flex;align-items:center;justify-content:center;padding:20px}
+#loginCard{background:#fff;width:min(420px,100%);padding:28px;border-radius:14px;box-shadow:0 8px 32px #0002;text-align:center}
+#loginCard h2{color:#173d35;margin-top:0}#loginCard input{width:100%;max-width:none;margin:8px 0}
+#loginMessage{color:#a83232;min-height:20px;font-size:13px}
+body.login-locked>header,body.login-locked>.layout{visibility:hidden}
+</style>
+</head>
+<body class="login-locked">
+<div id="loginGate"><div id="loginCard"><h2>HILTON TOWER</h2><p id="loginIntro">Admin Login Setup</p><p class="hint" id="loginHelp">Create your private admin password. Login ID: <b>admin</b></p><input id="loginPassword" type="password" autocomplete="new-password" placeholder="Create password (minimum 8 characters)"><input id="loginConfirm" type="password" autocomplete="new-password" placeholder="Confirm password"><button class="primary" id="loginAction" type="button" onclick="handleAdminLogin()">Save Password</button><p id="loginMessage"></p></div></div>
+
+<header><h2>HILTON TOWER OWNERS ASSOCIATION</h2><p>Association, Member & Flat Management System | Version 3.3 - English Edition</p></header>
+<div class="layout">
+<nav>
+<button class="active" onclick="show('dashboard',this)">🏠 Dashboard</button>
+<button onclick="show('members',this)">👥 Member List</button>
+<button onclick="show('investments',this)">💰 Member Investment</button>
+<button onclick="show('dues',this)">📌 Member Due</button>
+<button onclick="show('accounts',this)">📒 Income & Expense</button>
+<button onclick="show('rentLedger',this)">🏬 Tenant List / Rent</button>
+<button onclick="openWorkerType('Labour')">👷 Labour List</button>
+<button onclick="openWorkerType('Contractor')">🏗️ Contractor List</button>
+<button onclick="openWorkerType('Engineer')">📐 Engineer List</button>
+<button onclick="openWorkerType('Other')">🧰 Other Service Providers</button>
+<button onclick="show('officeStaff',this)">🧑‍💼 Office Staff List</button>
+<button onclick="show('officeSalary',this)">💵 Office Staff Salary</button>
+<button onclick="show('workerLedger',this)">📒 Work Bills & Payments</button>
+<button onclick="show('rentLedger',this)">🏬 Rent Collection</button>
+<button onclick="show('banks',this)">🏦 Bank Management</button>
+<button onclick="show('flats',this)">🏢 Flat Register</button>
+<button onclick="show('flatpayments',this)">💳 Flat Payment Collection</button>
+<button onclick="show('charges',this)">📅 Monthly Charges</button>
+<button onclick="show('reports',this)">📊 Reports</button>
+<button onclick="show('groupAdminPanel',this)">👥💬 Group Admin & Members</button>
+</nav>
+<main>
+<section id="dashboard">
+<h2>Association Dashboard</h2>
+<div class="cards">
+<div class="card"><small>Total Members</small><h2 id="memberCount">0</h2></div>
+<div class="card"><small>Total Investment</small><h2 id="investmentTotal">৳ 0</h2></div>
+<div class="card"><small>Total Member Due</small><h2 id="memberDueTotal">৳ 0</h2></div>
+<div class="card"><small>Other Income</small><h2 id="incomeTotal">৳ 0</h2></div>
+<div class="card"><small>Total Expense</small><h2 id="expenseTotal">৳ 0</h2></div>
+<div class="card"><small>Net Account Balance*</small><h2 id="netBalance">৳ 0</h2></div>
+<div class="card"><small>Total Flats</small><h2 id="totalFlats">64</h2></div>
+<div class="card"><small>Flat Payments</small><h2 id="flatCollection">৳ 0</h2></div>
+<div class="card"><small>Flat Outstanding</small><h2 id="flatOutstanding">৳ 0</h2></div>
+</div>
+<div class="panel"><h3>Welcome to HILTON TOWER</h3><p>Manage Members, Investments, Dues, Income, Expenses, and separate Flat Management from one application.</p><p class="hint">*Net Account Balance = Member Investment + Other Income − Expense. Flat collections are tracked separately.</p><p class="hint">Data is stored in this browser on this computer. Export backups regularly.</p></div>
+</section>
+
+<section id="members" class="hidden">
+<h2>Member List</h2>
+<div class="panel"><h3>Add / Edit Member</h3><input type="hidden" id="memberEditId">
+<div class="form-grid">
+<div><label>Member Name *</label><input id="memberName" placeholder="Member Name"></div>
+<div><label>Mobile Number</label><input id="memberPhone" placeholder="01XXXXXXXXX"></div>
+<div><label>Member Join Date *</label><input id="memberJoinDate" type="date"></div>
+<div><label>Address</label><input id="memberAddress" placeholder="Address"></div>
+<div><label>Agreed Investment Target (৳)</label><input id="memberTarget" type="number" min="0" step="0.01" placeholder="0"></div>
+<div><label>Member Photo</label><input class="file-input" id="memberPhotoFile" type="file" accept="image/*" onchange="previewMemberPhoto()"><div class="preview"><img id="memberPhotoPreview" class="member-photo" alt="Member photo" src="" style="display:none"><span class="hint">The image will be resized automatically before saving.</span></div></div>
+<div><label>Member Documents (NID / Deed / Agreement / PDF)</label><input class="file-input" id="memberDocsFile" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"><div id="memberDocCurrent" class="doc-list hint">Documents for the new member will appear here.</div></div>
+</div>
+<button class="primary" onclick="saveMember()">Save Member</button><button class="secondary" onclick="clearMemberForm()">Clear</button>
+<p class="hint">Member Due will be calculated: Agreed Investment Target − Total Investment Received. No due is calculated when the target is 0.</p>
+</div>
+<div class="panel"><h3>Member Records</h3><input id="memberSearch" placeholder="Search member / phone" oninput="render()"><div class="table-wrap">
+<table><thead><tr><th>Photo</th><th>Member ID</th><th>Name</th><th>Join Date</th><th>Mobile</th><th>Target</th><th>Invested</th><th>Due</th><th>Action</th></tr></thead><tbody id="memberRows"></tbody></table>
+</div></div>
+</section>
+
+<section id="investments" class="hidden">
+<h2>Member Investment</h2><div class="panel"><h3>Add Investment</h3>
+<input type="hidden" id="invEditId"><div class="form-grid">
+<div><label>Member *</label><select id="invMember"></select></div>
+<div><label>Amount (৳) *</label><input id="invAmount" type="number" min="0.01" step="0.01" placeholder="Amount"></div>
+<div><label>Bank Name</label><input id="invBank" list="bankOptions" placeholder="Bank Name"></div>
+<div><label>Investment Date & Time</label><input id="invDate" type="datetime-local"></div>
+<div><label>Payment Method</label><input id="invMethod" placeholder="Cash / Bank / bKash"></div>
+<div><label>Transaction ID</label><input id="invTxn" placeholder="Transaction ID"></div>
+<div><label>Remarks</label><input id="invNote" placeholder="Remarks"></div>
+<div><label>Deposit Receipt Photo / PDF</label><input class="file-input" id="invReceiptFile" type="file" accept="image/*,.pdf" onchange="previewInvestmentReceipt()"><div id="invReceiptCurrent" class="doc-list hint">Attach a receipt image or PDF.</div></div>
+</div><button class="primary" onclick="addInvestment()">Save Investment</button></div>
+<div class="panel"><h3>Investment History</h3><div class="table-wrap"><table><thead><tr><th>Member</th><th>Amount</th><th>Bank</th><th>Date & Time</th><th>Method</th><th>Transaction ID</th><th>Deposit Receipt</th><th>Action</th></tr></thead><tbody id="investmentRows"></tbody></table></div></div>
+</section>
+
+<section id="dues" class="hidden"><h2>Member Due Management</h2><div class="panel"><p class="note">Set each member’s Agreed Investment Target to view the total received and outstanding amount here. Edit the target from the Member List.</p><div class="table-wrap"><table><thead><tr><th>Member</th><th>Target (৳)</th><th>Total Invested (৳)</th><th>Due (৳)</th><th>Status</th></tr></thead><tbody id="dueRows"></tbody></table></div></div></section>
+
+<section id="accounts" class="hidden">
+<h2>Income & Expense</h2><div class="panel"><h3>Add Transaction / Bill Payment</h3><p class="note">Record Labour, Contractor, and Engineer bills under separate categories. For each entry, save the recipient, amount, date, payment method, and bill/receipt image or PDF.
+<input type="hidden" id="txEditId"><div class="form-grid">
+<div><label>Type</label><select id="txType" onchange="updateTransactionCategories()"><option value="income">Income</option><option value="expense" selected>Expense</option></select></div>
+<div><label>Category</label><select id="txCategory"><option>Construction Materials</option><option>Labour Bill</option><option>Contractor Bill</option><option>Waste Removal / Cleaning</option><option>Transport / Vehicle</option><option>Equipment Rental</option><option>Utility Bill</option><option>Office Cost</option><option>Other</option></select></div>
+<div><label>Description *</label><input id="txDescription" placeholder="Details"></div>
+<div><label>Amount (৳) *</label><input id="txAmount" type="number" min="0.01" step="0.01" placeholder="Amount"></div>
+<div><label>Bank Name</label><input id="txBank" list="bankOptions" placeholder="Bank Name"></div>
+<div><label>Date & Time</label><input id="txDate" type="datetime-local"></div>
+<div><label>Received From / Paid To *</label><input id="txParty" placeholder="Labour / Contractor / Engineer Name"></div>
+<div><label>Payment Method</label><select id="txMethod"><option value="">Select</option><option>Cash</option><option>Bank Transfer</option><option>Cheque</option><option>bKash</option><option>Nagad</option><option>Other</option></select></div>
+<div><label>Bill / Work Details</label><input id="txWorkDetails" placeholder="Work or billing period"></div>
+<div><label>Bill / Transaction ID</label><input id="txRef" placeholder="Bill No. / Cheque / Transaction ID"></div>
+<div><label>Bill / Receipt Photo or PDF</label><input id="txReceiptFile" type="file" accept="image/*,.pdf"><div id="txReceiptCurrent" class="doc-list hint">Attach a bill/receipt image or PDF (optional).</div></div>
+</div><button class="primary" onclick="addTransaction()">Save Transaction</button></div>
+<div class="panel"><h3>Income & Expense History</h3><div class="table-wrap"><table><thead><tr><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th>Bank</th><th>Date & Time</th><th>Paid To / Received From</th><th>Payment Method</th><th>Work / Bill Details</th><th>Bill / Receipt Proof</th><th>Action</th></tr></thead><tbody id="transactionRows"></tbody></table></div></div>
+</section>
+
+<section id="workerLedger" class="hidden">
+<h2>Labour / Contractor / Engineer Separate Accounts</h2>
+<div class="panel"><h3>Add Person / Company</h3><input type="hidden" id="workerEditId"><div class="form-grid">
+<div><label>Type</label><select id="workerType"><option>Labour</option><option>Contractor</option><option>Engineer</option><option>Other</option></select></div>
+<div><label>Name *</label><input id="workerName" placeholder="Name / Company Name"></div>
+<div><label>Mobile</label><input id="workerPhone" placeholder="Mobile Number"></div>
+<div><label>Address / Notes</label><input id="workerInfo" placeholder="Address or Notes"></div>
+</div><button class="primary" onclick="saveWorker()">Save Person</button></div>
+<div class="panel"><h3>Bill / Payment Entry</h3><p class="note">First enter the full bill amount using “Add New Bill”. When making a payment later, select “Advance” or “Partial Payment”. These payments will be deducted from the total bill, and the outstanding balance will be calculated automatically.</p><input type="hidden" id="wlEditId"><div class="form-grid">
+<div><label>Select Person *</label><select id="wlWorker"></select></div>
+<div><label>Entry Type</label><select id="wlEntryType"><option value="bill">Add New Bill</option><option value="advance">Advance Payment</option><option value="partial">Partial Payment</option><option value="payment">Full / Other Payment</option></select></div>
+<div><label>Amount (৳) *</label><input id="wlAmount" type="number" min="0.01" step="0.01"></div>
+<div><label>Date & Time *</label><input id="wlDate" type="datetime-local"></div>
+<div><label>Payment Method</label><select id="wlMethod"><option value="">Select</option><option>Cash</option><option>Bank Transfer</option><option>Cheque</option><option>bKash</option><option>Nagad</option><option>Other</option></select></div>
+<div><label>Bank Name</label><input id="wlBank" list="bankOptions" placeholder="Bank Name"></div>
+<div><label>Work / Bill Details</label><input id="wlDetails" placeholder="Work or billing period"></div>
+<div><label>Bill / Transaction ID</label><input id="wlRef" placeholder="Bill No. / Transaction ID"></div>
+<div><label>Bill / Payment Proof (Image/PDF)</label><input id="wlProof" type="file" accept="image/*,.pdf"><div id="wlProofCurrent" class="hint">Proof file is optional</div></div>
+</div><button class="primary" onclick="saveWorkerEntry()">Save Bill / Payment</button></div>
+<div class="panel"><h3>Summary by Person</h3><div class="table-wrap"><table><thead><tr><th>Type</th><th>Name</th><th>Total Bills</th><th>Total Paid</th><th>Outstanding</th><th>Action</th></tr></thead><tbody id="workerSummaryRows"></tbody></table></div></div>
+<div class="panel"><h3>Separate Name Lists</h3><p class="hint">Each category has its own list. Add a person above and select the matching type.</p><div class="table-wrap"><table><thead><tr><th>Labour Name</th><th>Mobile</th><th>Address / Notes</th><th>Total Bills</th><th>Total Paid</th><th>Outstanding</th><th>Action</th></tr></thead><tbody id="labourListRows"></tbody></table></div></div>
+<div class="panel"><h3>Contractor List</h3><div class="table-wrap"><table><thead><tr><th>Name / Company</th><th>Mobile</th><th>Address / Notes</th><th>Total Bills</th><th>Total Paid</th><th>Outstanding</th><th>Action</th></tr></thead><tbody id="contractorListRows"></tbody></table></div></div>
+<div class="panel"><h3>Engineer List</h3><div class="table-wrap"><table><thead><tr><th>Name</th><th>Mobile</th><th>Address / Notes</th><th>Total Bills</th><th>Total Paid</th><th>Outstanding</th><th>Action</th></tr></thead><tbody id="engineerListRows"></tbody></table></div></div>
+<div class="panel"><h3>Other Persons / Service Providers List</h3><div class="table-wrap"><table><thead><tr><th>Name / Company</th><th>Mobile</th><th>Address / Notes</th><th>Total Bills</th><th>Total Paid</th><th>Outstanding</th><th>Action</th></tr></thead><tbody id="otherListRows"></tbody></table></div></div>
+<div class="panel"><h3>Detailed Bill and Payment History</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Name</th><th>Entry</th><th>Amount</th><th>Method</th><th>Bank</th><th>Work Details</th><th>Proof</th><th>Action</th></tr></thead><tbody id="workerEntryRows"></tbody></table></div></div>
+</section>
+<section id="rentLedger" class="hidden">
+<h2>Shop / Parking / Building / Flat Rent Collection</h2><p class="note">The total rent due through the current month is calculated automatically from the agreement start date and monthly rent. Unpaid months are included in the outstanding balance.</p>
+<div class="panel"><h3>Add Tenant / Payer</h3><input type="hidden" id="rentPersonEditId"><div class="form-grid">
+<div><label>Rent Type</label><select id="rentUnitType"><option>Shop Rent</option><option>Parking</option><option>Building Rent</option><option>Flat Rent</option><option>Other</option></select></div>
+<div><label>Tenant / Person / Company Name *</label><input id="rentPersonName" placeholder="Name of the person or company paying rent"></div>
+<div><label>Shop / Parking / Flat Number</label><input id="rentUnit" placeholder="Shop No. / Flat / Parking Slot"></div>
+<div><label>Mobile</label><input id="rentPhone" placeholder="Mobile Number"></div>
+<div><label>Monthly Rent (৳)</label><input id="rentMonthly" type="number" min="0" step="0.01" placeholder="Rent as per agreement"></div>
+<div><label>Previous / Opening Due (৳)</label><input id="rentOpeningDue" type="number" min="0" step="0.01" placeholder="Enter any outstanding amount from before"><small class="hint">Enter any previous outstanding amount when adding a new tenant.</small></div>
+<div><label>Agreement / Rent Start Date</label><input id="rentStart" type="date"></div>
+<div><label>Rental Agreement (Image/PDF)</label><input id="rentContractFile" type="file" accept="image/*,.pdf"><div id="rentContractCurrent" class="hint">Upload the rental agreement (optional)</div></div>
+<div><label>Address / Notes</label><input id="rentInfo" placeholder="Additional Information"></div>
+</div><button class="primary" onclick="saveRentPerson()">Save Tenant</button></div>
+<div class="panel"><h3>Rent Bill / Payment Entry</h3><p class="note">The total rent due through the current month is calculated automatically from the agreement start date and monthly rent. You may also add a monthly rent charge; the same month will not be counted twice. When payment is received, select Advance Rent Received, Partial Rent Received, or Rent Received. Payments and advances are deducted from the outstanding balance. You may attach a receipt or bank slip image/PDF as proof.</p>
+<input type="hidden" id="rentEntryEditId"><div class="form-grid">
+<div><label>Select Tenant *</label><select id="rentEntryPerson"></select></div>
+<div><label>Entry Type</label><select id="rentEntryType" onchange="rentEntryTypeChanged()"><option value="due">Add Monthly Rent Due</option><option value="advance">Advance Rent Received</option><option value="partial">Partial Rent Received</option><option value="received">Rent Received / Full Payment</option></select></div>
+<div><label>Rent Month (Select Month)</label><input id="rentEntryMonth" type="month" onchange="rentEntryMonthChanged()"><small class="hint">If rent is unpaid, select that month to add it as due.</small></div>
+<div><label>Amount (৳) *</label><input id="rentEntryAmount" type="number" min="0.01" step="0.01"></div>
+<div><label>Date & Time *</label><input id="rentEntryDate" type="datetime-local"></div>
+<div><label>Rent Month / Description</label><input id="rentEntryDetails" placeholder="Example: November 2026"></div>
+<div><label>Payment Method</label><select id="rentEntryMethod"><option value="">Select</option><option>Cash</option><option>Bank Transfer</option><option>Cheque</option><option>bKash</option><option>Nagad</option><option>Other</option></select></div>
+<div><label>Bank Name</label><input id="rentEntryBank" list="bankOptions" placeholder="Bank Name"></div>
+<div><label>Receipt / Transaction ID</label><input id="rentEntryRef" placeholder="Receipt No. / Transaction ID"></div>
+<div><label>Receipt / Proof (Image/PDF)</label><input id="rentEntryProof" type="file" accept="image/*,.pdf"><div id="rentEntryProofCurrent" class="hint">Proof file is optional</div></div>
+</div><button class="primary" onclick="saveRentEntry()">Save Rent Entry</button></div>
+<div class="panel"><h3>Tenant Summary</h3><div class="table-wrap"><table><thead><tr><th>Type</th><th>Tenant</th><th>Unit</th><th>Monthly Rent</th><th>Previous Due</th><th>Total Rent Charged (Agreement)</th><th>Total Received (Including Advance)</th><th>Total Outstanding</th><th>Agreement</th><th>Action</th></tr></thead><tbody id="rentSummaryRows"></tbody></table></div></div>
+<div class="panel"><h3>Detailed Rent Collection History</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Tenant</th><th>Entry</th><th>Amount</th><th>Month / Description</th><th>Method</th><th>Bank</th><th>Proof</th><th>Action</th></tr></thead><tbody id="rentEntryRows"></tbody></table></div></div>
+</section>
+<section id="officeStaff" class="hidden">
+<h2>Office Staff List</h2>
+<div class="panel"><h3>Add / Edit Office Staff</h3><input type="hidden" id="staffEditId"><div class="form-grid">
+<div><label>Staff Name *</label><input id="staffName" placeholder="Full Name"></div><div><label>Designation</label><input id="staffRole" placeholder="Manager / Accountant / Guard"></div><div><label>Mobile</label><input id="staffPhone" placeholder="Mobile Number"></div><div><label>Monthly Salary (৳)</label><input id="staffMonthly" type="number" min="0" step="0.01" placeholder="Monthly Salary"></div><div><label>Joining Date</label><input id="staffJoin" type="date"></div><div><label>Address / Notes</label><input id="staffInfo" placeholder="Address or Notes"></div>
+</div><button class="primary" onclick="saveStaff()">Save Staff</button><button class="secondary" onclick="clearStaffForm()">Clear</button></div>
+<div class="panel"><h3>Office Staff Records</h3><input id="staffSearch" placeholder="Search staff name / designation" oninput="render()"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Designation</th><th>Mobile</th><th>Monthly Salary</th><th>Paid This Month</th><th>Current Month Due</th><th>Action</th></tr></thead><tbody id="staffRows"></tbody></table></div></div>
+</section>
+<section id="officeSalary" class="hidden">
+<h2>Office Staff Salary</h2>
+<div class="panel"><h3>Salary Payment Entry</h3><input type="hidden" id="salaryEditId"><div class="form-grid">
+<div><label>Select Staff *</label><select id="salaryStaff"></select></div><div><label>Salary Month *</label><input id="salaryMonth" type="month"></div><div><label>Amount Paid (৳) *</label><input id="salaryAmount" type="number" min="0.01" step="0.01"></div><div><label>Payment Date *</label><input id="salaryDate" type="date"></div><div><label>Payment Method</label><select id="salaryMethod"><option>Cash</option><option>Bank Transfer</option><option>Cheque</option><option>bKash</option><option>Nagad</option><option>Other</option></select></div><div><label>Bank / Reference</label><input id="salaryRef" placeholder="Bank name / Transaction ID"></div><div><label>Notes</label><input id="salaryNote" placeholder="Salary / Bonus / Advance details"></div>
+</div><button class="primary" onclick="saveSalary()">Save Salary Payment</button></div>
+<div class="panel"><h3>Salary Payment History</h3><div class="table-wrap"><table><thead><tr><th>Month</th><th>Staff</th><th>Amount</th><th>Payment Date</th><th>Method</th><th>Reference</th><th>Notes</th><th>Action</th></tr></thead><tbody id="salaryRows"></tbody></table></div></div>
+</section>
+<section id="banks" class="hidden"><h2>Bank Management</h2><div class="panel"><h3>Add Bank Name</h3><input id="bankName" placeholder="Bank Name"><button class="primary" onclick="addBank()">Add Bank</button><p class="hint">Bank names added here will appear as suggestions in the Investment, Income, and Expense forms.</p><div class="table-wrap"><table><thead><tr><th>Bank Name</th><th>Action</th></tr></thead><tbody id="bankRows"></tbody></table></div></div></section>
+
+<section id="flats" class="hidden">
+<h2>Flat & Owner Register</h2><div class="panel"><h3>Add / Edit Flat</h3><input type="hidden" id="flatEditId">
+<div class="form-grid">
+<div><label>Flat Number *</label><input id="flatNo" placeholder="A-101"></div>
+<div><label>Owner Name</label><input id="flatOwner" placeholder="Owner Name"></div>
+<div><label>Mobile Number</label><input id="flatPhone" placeholder="01XXXXXXXXX"></div>
+<div><label>Floor</label><input id="flatFloor" placeholder="1st Floor"></div>
+<div><label>Area (Sqft)</label><input id="flatArea" type="number" min="0" placeholder="1200"></div>
+<div><label>Monthly Service Charge (৳)</label><input id="flatCharge" type="number" min="0" placeholder="0"></div>
+<div><label>Opening Due (৳)</label><input id="flatOpening" type="number" min="0" placeholder="0"></div>
+</div><button class="primary" onclick="saveFlat()">Save Flat</button><button class="secondary" onclick="clearFlatForm()">Clear</button>
+</div>
+<div class="panel"><h3>Flat List</h3><input id="flatSearch" placeholder="Search flat / owner / phone" oninput="render()"><div class="table-wrap"><table><thead><tr><th>Flat</th><th>Owner</th><th>Mobile</th><th>Floor</th><th>Monthly Charge</th><th>Due</th><th>Action</th></tr></thead><tbody id="flatRows"></tbody></table></div></div>
+</section>
+
+<section id="flatpayments" class="hidden"><h2>Flat Payment Collection</h2><div class="panel">
+<input type="hidden" id="payEditId"><label>Select Flat</label><br><select id="payFlat"></select><br><label>Payment Date</label><br><input id="payDate" type="date"><br>
+<label>Payment Amount (৳)</label><br><input id="payAmount" type="number" min="0.01" step="0.01" placeholder="Amount"><br>
+<label>Payment Note</label><br><input id="payNote" placeholder="Service charge / other"><br><button class="primary" onclick="addFlatPayment()">Save Payment</button>
+</div><div class="panel"><h3>Flat Payment History</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Flat</th><th>Amount</th><th>Note</th><th>Action</th></tr></thead><tbody id="flatPaymentRows"></tbody></table></div></div></section>
+
+<section id="charges" class="hidden"><h2>Monthly Service Charge</h2><div class="panel"><p>Monthly charges will be added for all flats for the selected month. The same month cannot be generated twice.</p><label>Select Month</label><br><input id="chargeMonth" type="month"><br><button class="primary" onclick="generateCharges()">Generate Monthly Charges</button></div><div class="panel"><h3>Charge History</h3><div class="table-wrap"><table><thead><tr><th>Month</th><th>Flat</th><th>Amount</th><th>Action</th></tr></thead><tbody id="chargeRows"></tbody></table></div></div></section>
+
+<section id="reports" class="hidden"><h2>Consolidated Reports / All Reports</h2>
+<div class="panel"><h3>Search Reports</h3><div class="form-grid">
+<div><label>Report Type</label><select id="reportType" onchange="renderReports()"><option value="all">All Records</option><option value="member">Member Report</option><option value="investment">Investment Report</option><option value="income">Income Report</option><option value="expense">Expense Report</option><option value="rent">Tenant / Rent Report</option><option value="tenantlist">Tenant List Report</option><option value="salary">Office Staff Salary Report</option><option value="stafflist">Office Staff List Report</option><option value="worker">All Labour / Contractor / Engineer / Other Reports</option><option value="worker-Labour">Labour Report</option><option value="worker-Contractor">Contractor Report</option><option value="worker-Engineer">Engineer Report</option><option value="worker-Other">Other Persons Report</option><option value="flat">Flat / Service Charge Report</option></select></div>
+<div><label>Search by Name</label><input id="reportSearch" placeholder="Member / Tenant / Labour / Contractor" oninput="renderReports()"></div>
+<div><label>By Month</label><input id="reportMonth" type="month" onchange="renderReports()"></div>
+<div><label>Start Date</label><input id="reportFrom" type="date" onchange="renderReports()"></div>
+<div><label>End Date</label><input id="reportTo" type="date" onchange="renderReports()"></div>
+</div><button class="secondary" onclick="clearReportFilters()">Clear Filters</button><button class="primary" onclick="window.print()">Print Report</button><button class="secondary" onclick="exportReportCSV()">Download This Report as CSV</button></div>
+<div class="panel" id="reportSummary"></div><div class="panel"><h3 id="reportTableTitle">Detailed Records</h3><div class="table-wrap"><table><thead id="reportHead"></thead><tbody id="reportRows"></tbody></table></div></div>
+<div class="panel"><h3>Backup & Other Options</h3><button class="secondary" onclick="exportBackup()">Download Full Backup (JSON)</button><label style="display:inline-block;margin:8px">Restore Backup <input type="file" accept="application/json,.json" onchange="importBackup(event)"></label><button class="secondary" onclick="exportCSV()">Export Member CSV</button><p class="hint">All reports are generated from the data saved in this software.</p></div>
+</section>
+
+<section id="groupAdminPanel" class="hidden">
+<h2>Hilton Tower Group Admin & Member Panel</h2>
+<p class="note">WhatsApp বা Messenger গ্রুপের মতো এখানে গ্রুপের সকল অ্যাডমিন ও সাধারণ সদস্যদের তালিকা দেখতে পাবেন। কে গ্রুপ অ্যাডমিন এবং কে সদস্য তা ব্যাজ (Badge) এর মাধ্যমে চিহ্নিত করা আছে।</p>
+<div class="panel"><h3>Add Participant / Assign Role</h3><div class="form-grid">
+<div><label>Name *</label><input id="ganName" placeholder="Participant Name"></div>
+<div><label>Mobile / Contact</label><input id="ganPhone" placeholder="01XXXXXXXXX"></div>
+<div><label>Role</label><select id="ganRole"><option value="Member">👤 Group Member</option><option value="Admin">🛡️ Group Admin</option><option value="Owner">👑 Group Owner</option></select></div>
+</div><button class="primary" onclick="addGroupParticipant()">Add Participant</button></div>
+<div class="panel"><h3>Group Participants (Admins & Members)</h3><div class="table-wrap">
+<table><thead><tr><th>Name</th><th>Mobile</th><th>Role</th><th>Action</th></tr></thead><tbody id="groupParticipantRows"></tbody></table>
+</div></div>
+</section>
+
+<datalist id="bankOptions"></datalist>
+</main></div>
+<script>
+const DBKEY='hilton_tower_v20';
+function fresh(){return {groupParticipants:[{id:'GP1',name:'Sowrov Kumar Barman',phone:'01700000000',role:'Owner'},{id:'GP2',name:'Kalam Bhai',phone:'01800000000',role:'Admin'},{id:'GP3',name:'Hilton Tower Supervisor',phone:'01900000000',role:'Admin'}],members:[],investments:[],transactions:[],workers:[],workerEntries:[],officeStaff:[],salaryPayments:[],rentPeople:[],rentEntries:[],banks:[],flats:Array.from({length:64},(_,i)=>({id:'F'+(i+1),flat:'A-'+(101+i),owner:'',phone:'',floor:'',area:0,charge:0,opening:0,active:true})),flatPayments:[],flatCharges:[]}}
+function loadDB(){try{let x=JSON.parse(localStorage.getItem(DBKEY));if(x&&x.members&&x.flats)return {...fresh(),...x}}catch(e){}return fresh()}
+let db=loadDB();
+const $=id=>document.getElementById(id);
+const money=n=>'৳ '+Number(n||0).toLocaleString('en-BD',{maximumFractionDigits:2});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function localDateTime(){let d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+function save(){localStorage.setItem(DBKEY,JSON.stringify(db));render()}
+function show(id,btn){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active')}
+function openWorkerType(type){show('workerLedger');$('workerType').value=type;document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));window.scrollTo(0,0)}
+function memberName(id){return db.members.find(m=>m.id===id)?.name||'Unknown Member'}
+function invested(id){return db.investments.filter(x=>x.memberId===id).reduce((s,x)=>s+Number(x.amount),0)}
+function memberDue(m){return Math.max(0,Number(m.target||0)-invested(m.id))}
+function flatDue(f){let c=db.flatCharges.filter(x=>x.flatId===f.id).reduce((s,x)=>s+x.amount,0),p=db.flatPayments.filter(x=>x.flatId===f.id).reduce((s,x)=>s+x.amount,0);return Number(f.opening||0)+c-p}
+function addMember(){let name=$('memberName').value.trim(),target=Number($('memberTarget').value||0);if(!name||!Number.isFinite(target)||target<0){alert('Member name and enter a valid target.');return}db.members.push({id:'M'+Date.now(),name,phone:$('memberPhone').value.trim(),address:$('memberAddress').value.trim(),target});clearMemberForm();save()}
+function clearMemberForm(){['memberEditId','memberName','memberPhone','memberJoinDate','memberAddress','memberTarget','memberPhotoFile','memberDocsFile'].forEach(id=>$(id).value='');let jd=new Date();jd.setMinutes(jd.getMinutes()-jd.getTimezoneOffset());$('memberJoinDate').value=jd.toISOString().slice(0,10);$('memberPhotoPreview').style.display='none';$('memberPhotoPreview').src='';$('memberDocCurrent').innerHTML='Documents for the new member will appear here.'}
+function previewMemberPhoto(){let f=$('memberPhotoFile').files[0];if(!f)return;let r=new FileReader();r.onload=()=>{$('memberPhotoPreview').src=r.result;$('memberPhotoPreview').style.display='block'};r.readAsDataURL(f)}
+function readFile(file){return new Promise((resolve,reject)=>{let r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
+function compressPhoto(file){return new Promise((resolve,reject)=>{let r=new FileReader();r.onerror=reject;r.onload=()=>{let im=new Image();im.onerror=reject;im.onload=()=>{let c=document.createElement('canvas'),scale=Math.min(1,500/Math.max(im.width,im.height));c.width=Math.round(im.width*scale);c.height=Math.round(im.height*scale);c.getContext('2d').drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.78))};im.src=r.result};r.readAsDataURL(file)})}
+function renderMemberDocs(m){let docs=m.documents||[];$('memberDocCurrent').innerHTML=docs.length?docs.map((d,i)=>`<div>📎 <a href="${d.data}" target="_blank" rel="noopener">${esc(d.name)}</a> <button type="button" class="danger" onclick="removeMemberDoc('${esc(m.id)}',${i})">Remove</button></div>`).join(''):'No documents have been added yet.'}
+function removeMemberDoc(id,i){let m=db.members.find(x=>x.id===id);if(m&&confirm('Delete this document?')){m.documents=m.documents||[];m.documents.splice(i,1);save();if($('memberEditId').value===id)renderMemberDocs(m)}}
+async function saveMember(){let id=$('memberEditId').value,name=$('memberName').value.trim(),target=Number($('memberTarget').value||0);if(!name||!Number.isFinite(target)||target<0){alert('Enter a valid member name and target.');return}let joinDate=$('memberJoinDate').value;if(!joinDate)return alert('Member Join Date Select an option.');let m=id?db.members.find(x=>x.id===id):null;if(!m){m={id:'M'+Date.now(),documents:[]};db.members.push(m)}Object.assign(m,{name,phone:$('memberPhone').value.trim(),joinDate,address:$('memberAddress').value.trim(),target});let photo=$('memberPhotoFile').files[0];if(photo){if(!photo.type.startsWith('image/'))return alert('Select a valid image.');m.photo=await compressPhoto(photo)}let files=Array.from($('memberDocsFile').files||[]);for(let f of files){if(f.size>1200000){alert(f.name+' 1.2 MB-is too large. Choose a smaller file.');continue}m.documents=m.documents||[];m.documents.push({name:f.name,type:f.type,data:await readFile(f)})}clearMemberForm();save()}
+function editMember(id){let m=db.members.find(x=>x.id===id);if(!m)return;$('memberEditId').value=m.id;$('memberName').value=m.name;$('memberPhone').value=m.phone||'';$('memberJoinDate').value=m.joinDate||'';$('memberAddress').value=m.address||'';$('memberTarget').value=m.target||0;if(m.photo){$('memberPhotoPreview').src=m.photo;$('memberPhotoPreview').style.display='block'}renderMemberDocs(m);show('members');window.scrollTo(0,0)}
+function deleteMember(id){if(db.investments.some(x=>x.memberId===id)){alert('This member has investment history and cannot be deleted.');return}if(confirm('Delete this member?')){db.members=db.members.filter(x=>x.id!==id);save()}}
+function previewInvestmentReceipt(){let f=$('invReceiptFile').files[0];if(!f)return;let box=$('invReceiptCurrent');if(f.type.startsWith('image/')){let r=new FileReader();r.onload=()=>{box.innerHTML=`<img src="${r.result}" style="max-width:150px;max-height:110px;display:block;margin:6px 0"><span>${esc(f.name)}</span>`};r.readAsDataURL(f)}else box.textContent='Selected file: '+f.name}
+function viewReceipt(data,name){if(!data)return;let w=window.open();if(w){w.document.write(`<title>${esc(name||'Deposit Receipt')}</title><iframe src="${data}" style="width:100%;height:100%;border:0"></iframe>`);w.document.close()}}
+function removeInvestmentReceipt(id){let x=db.investments.find(x=>x.id===id);if(x&&confirm('Delete this deposit receipt?')){delete x.receipt;save();if($('invEditId').value===id)$('invReceiptCurrent').textContent='Receipt deleted.'}}
+async function addInvestment(){let id=$('invEditId').value,memberId=$('invMember').value,amount=Number($('invAmount').value);if(!memberId||!Number.isFinite(amount)||amount<=0){alert('Member Make a selection and enter a valid amount.');return}let old=id?db.investments.find(x=>x.id===id):null;let obj={id:id||'I'+Date.now(),memberId,amount,bank:$('invBank').value.trim(),date:$('invDate').value||localDateTime(),method:$('invMethod').value.trim(),txn:$('invTxn').value.trim(),note:$('invNote').value.trim(),receipt:old?.receipt||null,receiptName:old?.receiptName||''};let file=$('invReceiptFile').files[0];if(file){if(file.size>1500000){alert('Receipt exceeds 1.5 MB. Please choose a smaller file.');return}if(!(file.type.startsWith('image/')||file.type==='application/pdf')){alert('Upload an image or PDF receipt only.');return}obj.receipt=await readFile(file);obj.receiptName=file.name}if(id){let i=db.investments.findIndex(x=>x.id===id);if(i>=0)db.investments[i]=obj}else db.investments.push(obj);$('invEditId').value='';['invAmount','invBank','invMethod','invTxn','invNote','invReceiptFile'].forEach(id=>$(id).value='');$('invReceiptCurrent').textContent='Attach a receipt image or PDF.';$('invDate').value=localDateTime();save()}
+function editInvestment(id){let x=db.investments.find(x=>x.id===id);if(!x)return;$('invEditId').value=x.id;$('invMember').value=x.memberId;$('invAmount').value=x.amount;$('invBank').value=x.bank||'';$('invDate').value=x.date||'';$('invMethod').value=x.method||'';$('invTxn').value=x.txn||'';$('invNote').value=x.note||'';$('invReceiptFile').value='';$('invReceiptCurrent').innerHTML=x.receipt?`<a href="#" onclick="viewReceipt('${x.receipt}','${esc(x.receiptName||'Receipt')}');return false">📎 ${esc(x.receiptName||'View receipt')}</a> <button type="button" class="danger" onclick="removeInvestmentReceipt('${esc(x.id)}')">Remove</button>`:'No receipts have been added yet.';show('investments');window.scrollTo(0,0)}
+function deleteInvestment(id){if(confirm('Delete this investment entry?')){db.investments=db.investments.filter(x=>x.id!==id);save()}}
+function updateTransactionCategories(selected){let type=$('txType').value,opts=type==='expense'?['Construction Materials','Labour Bill','Contractor Bill','Engineer Bill','Waste Removal / Cleaning','Transport / Vehicle','Equipment Rental','Utility Bill','Office Cost','Other']:['Shop Rent / Shop Rent','Parking Fee / Parking','Building Rent / Building Rent','Flat Rent / Flat Rent','Waste Sale','Donation','Bank Interest','Other Income','Other'];$('txCategory').innerHTML=opts.map(x=>`<option>${x}</option>`).join('');if(selected&&opts.includes(selected))$('txCategory').value=selected}
+function viewTransactionReceipt(id){let x=db.transactions.find(x=>x.id===id);if(x&&x.receipt)viewReceipt(x.receipt,x.receiptName||'Bill / Receipt')}
+async function addTransaction(){let id=$('txEditId').value,type=$('txType').value,amount=Number($('txAmount').value),description=$('txDescription').value.trim();if(!description||!Number.isFinite(amount)||amount<=0){alert('Description and valid Amount enter।');return}let old=id?db.transactions.find(x=>x.id===id):null,obj={id:id||'T'+Date.now(),type,category:$('txCategory').value,description,amount,bank:$('txBank').value.trim(),date:$('txDate').value||localDateTime(),party:$('txParty').value.trim(),paymentMethod:$('txMethod').value,workDetails:$('txWorkDetails').value.trim(),ref:$('txRef').value.trim(),receipt:old?.receipt||null,receiptName:old?.receiptName||''};let file=$('txReceiptFile').files[0];if(file){if(file.size>1500000){alert('Bill/receipt exceeds 1.5 MB. Please choose a smaller file.');return}if(!(file.type.startsWith('image/')||file.type==='application/pdf')){alert('Upload an image or PDF file only.');return}obj.receipt=await readFile(file);obj.receiptName=file.name}if(id){let i=db.transactions.findIndex(x=>x.id===id);if(i>=0)db.transactions[i]=obj}else db.transactions.push(obj);$('txEditId').value='';['txDescription','txAmount','txBank','txParty','txMethod','txWorkDetails','txRef','txReceiptFile'].forEach(id=>$(id).value='');$('txReceiptCurrent').textContent='Attach a bill/receipt image or PDF (optional).';$('txType').value='expense';updateTransactionCategories();$('txDate').value=localDateTime();save()}
+function editTransaction(id){let x=db.transactions.find(x=>x.id===id);if(!x)return;$('txEditId').value=x.id;$('txType').value=x.type;updateTransactionCategories(x.category);$('txDescription').value=x.description;$('txAmount').value=x.amount;$('txBank').value=x.bank||'';$('txDate').value=x.date||'';$('txParty').value=x.party||'';$('txMethod').value=x.paymentMethod||'';$('txWorkDetails').value=x.workDetails||'';$('txRef').value=x.ref||'';$('txReceiptFile').value='';$('txReceiptCurrent').innerHTML=x.receipt?`<a href="#" onclick="viewTransactionReceipt('${x.id}');return false">📎 ${esc(x.receiptName||'View bill / receipt')}</a>`:'Attach a bill/receipt image or PDF (optional).';show('accounts');window.scrollTo(0,0)}
+function deleteTransaction(id){if(confirm('Delete this transaction?')){db.transactions=db.transactions.filter(x=>x.id!==id);save()}}
+function saveWorker(){let id=$('workerEditId').value,name=$('workerName').value.trim();if(!name)return alert('Name Enter a value.');let obj={id:id||'W'+Date.now(),type:$('workerType').value,name,phone:$('workerPhone').value.trim(),info:$('workerInfo').value.trim()};if(id){let i=db.workers.findIndex(x=>x.id===id);if(i>=0)db.workers[i]=obj}else db.workers.push(obj);clearWorkerForm();save()}
+function clearWorkerForm(){['workerEditId','workerName','workerPhone','workerInfo'].forEach(id=>$(id).value='');$('workerType').value='Labour'}
+function editWorker(id){let w=db.workers.find(x=>x.id===id);if(!w)return;$('workerEditId').value=w.id;$('workerType').value=w.type;$('workerName').value=w.name;$('workerPhone').value=w.phone||'';$('workerInfo').value=w.info||'';show('workerLedger')}
+function deleteWorker(id){if(db.workerEntries.some(x=>x.workerId===id))return alert('This person has bill/payment records and cannot be deleted.');if(confirm('Delete this name?')){db.workers=db.workers.filter(x=>x.id!==id);save()}}
+function workerName(id){return db.workers.find(x=>x.id===id)?.name||'Unknown'}
+function workerTotals(id){let a=db.workerEntries.filter(x=>x.workerId===id);return {bill:a.filter(x=>x.entryType==='bill').reduce((s,x)=>s+Number(x.amount),0),paid:a.filter(x=>['payment','advance','partial'].includes(x.entryType)).reduce((s,x)=>s+Number(x.amount),0)}}
+async function saveWorkerEntry(){let id=$('wlEditId').value,workerId=$('wlWorker').value,amount=Number($('wlAmount').value),date=$('wlDate').value;if(!workerId||!date||!Number.isFinite(amount)||amount<=0)return alert('Enter a person, date, and valid amount.');let old=id?db.workerEntries.find(x=>x.id===id):null,obj={id:id||'WE'+Date.now(),workerId,entryType:$('wlEntryType').value,amount,date,method:$('wlMethod').value,bank:$('wlBank').value.trim(),details:$('wlDetails').value.trim(),ref:$('wlRef').value.trim(),proof:old?.proof||null,proofName:old?.proofName||''};let f=$('wlProof').files[0];if(f){if(f.size>1500000)return alert('File exceeds 1.5 MB. Please choose a smaller file.');if(!(f.type.startsWith('image/')||f.type==='application/pdf'))return alert('Upload an image or PDF only.');obj.proof=await readFile(f);obj.proofName=f.name}if(id){let i=db.workerEntries.findIndex(x=>x.id===id);if(i>=0)db.workerEntries[i]=obj}else db.workerEntries.push(obj);clearWorkerEntryForm();save()}
+function clearWorkerEntryForm(){['wlEditId','wlAmount','wlBank','wlDetails','wlRef','wlProof'].forEach(id=>$(id).value='');$('wlEntryType').value='bill';$('wlMethod').value='';$('wlDate').value=localDateTime();$('wlProofCurrent').textContent='Proof file is optional'}
+function editWorkerEntry(id){let x=db.workerEntries.find(x=>x.id===id);if(!x)return;$('wlEditId').value=x.id;$('wlWorker').value=x.workerId;$('wlEntryType').value=x.entryType;$('wlAmount').value=x.amount;$('wlDate').value=x.date;$('wlMethod').value=x.method||'';$('wlBank').value=x.bank||'';$('wlDetails').value=x.details||'';$('wlRef').value=x.ref||'';$('wlProof').value='';$('wlProofCurrent').innerHTML=x.proof?`<a href="${x.proof}" target="_blank">📎 ${esc(x.proofName||'View Proof')}</a>`:'Proof file is optional';show('workerLedger');window.scrollTo(0,0)}
+function deleteWorkerEntry(id){if(confirm('Delete this bill/payment entry?')){db.workerEntries=db.workerEntries.filter(x=>x.id!==id);save()}}
+function viewWorkerProof(id){let x=db.workerEntries.find(x=>x.id===id);if(x?.proof){let a=document.createElement('a');a.href=x.proof;a.target='_blank';a.click()}}
+async function saveRentPerson(){let id=$('rentPersonEditId').value,name=$('rentPersonName').value.trim();if(!name)return alert('Enter tenant name.');let old=id?db.rentPeople.find(x=>x.id===id):null,obj={id:id||'RP'+Date.now(),type:$('rentUnitType').value,name,unit:$('rentUnit').value.trim(),phone:$('rentPhone').value.trim(),monthly:Number($('rentMonthly').value)||0,openingDue:Number($('rentOpeningDue').value)||0,start:$('rentStart').value,info:$('rentInfo').value.trim(),contract:old?.contract||null,contractName:old?.contractName||''};let f=$('rentContractFile').files[0];if(f){if(f.size>1500000)return alert('Agreement exceeds 1.5 MB. Please choose a smaller file.');if(!(f.type.startsWith('image/')||f.type==='application/pdf'))return alert('Upload an image or PDF agreement only.');obj.contract=await readFile(f);obj.contractName=f.name}if(id){let i=db.rentPeople.findIndex(x=>x.id===id);if(i>=0)db.rentPeople[i]=obj}else db.rentPeople.push(obj);clearRentPersonForm();save()}
+function clearRentPersonForm(){['rentPersonEditId','rentPersonName','rentUnit','rentPhone','rentMonthly','rentOpeningDue','rentStart','rentInfo','rentContractFile'].forEach(id=>$(id).value='');$('rentContractCurrent').textContent='Upload the rental agreement (optional)';$('rentUnitType').value='Shop Rent'}
+function editRentPerson(id){let x=db.rentPeople.find(x=>x.id===id);if(!x)return;$('rentPersonEditId').value=x.id;$('rentUnitType').value=x.type;$('rentPersonName').value=x.name;$('rentUnit').value=x.unit||'';$('rentPhone').value=x.phone||'';$('rentMonthly').value=x.monthly||0;$('rentOpeningDue').value=x.openingDue||0;$('rentStart').value=x.start||'';$('rentInfo').value=x.info||'';$('rentContractFile').value='';$('rentContractCurrent').innerHTML=x.contract?`<a href="${x.contract}" target="_blank">📄 ${esc(x.contractName||'View Agreement')}</a> <button type="button" class="danger" onclick="removeRentContract('${esc(x.id)}')">Remove</button>`:'Upload the rental agreement (optional)';show('rentLedger');window.scrollTo(0,0)}
+function removeRentContract(id){let x=db.rentPeople.find(x=>x.id===id);if(x&&confirm('Delete the agreement?')){delete x.contract;delete x.contractName;save();$('rentContractCurrent').textContent='Agreement deleted.'}}
+function viewRentContract(id){let x=db.rentPeople.find(x=>x.id===id);if(x?.contract){let a=document.createElement('a');a.href=x.contract;a.target='_blank';a.click()}}
+function deleteRentPerson(id){if(db.rentEntries.some(x=>x.personId===id))return alert('This tenant has rent records and cannot be deleted.');if(confirm('Delete this tenant?')){db.rentPeople=db.rentPeople.filter(x=>x.id!==id);save()}}
+function rentPersonName(id){return db.rentPeople.find(x=>x.id===id)?.name||'Unknown'}
+function rentTotals(id){let a=db.rentEntries.filter(x=>x.personId===id),manualDue=a.filter(x=>x.entryType==='due').reduce((s,x)=>s+Number(x.amount),0),p=db.rentPeople.find(x=>x.id===id),openingDue=Number(p?.openingDue||0),autoDue=0;if(p?.start&&Number(p.monthly)>0){let st=new Date(p.start+'T00:00:00'),now=new Date();let months=(now.getFullYear()-st.getFullYear())*12+(now.getMonth()-st.getMonth())+1;if(months>0)autoDue=months*Number(p.monthly)}let currentDue=Math.max(manualDue,autoDue),due=openingDue+currentDue,received=a.filter(x=>['advance','partial','received'].includes(x.entryType)).reduce((s,x)=>s+Number(x.amount),0);return {due,openingDue,currentDue,received,balance:Math.max(0,due-received),credit:Math.max(0,received-due),autoDue,manualDue,months:p?.start&&autoDue?Math.max(0,Math.floor(autoDue/(Number(p.monthly)||1))):0}}
+function rentEntryTypeChanged(){let isDue=$('rentEntryType').value==='due';$('rentEntryMonth').disabled=!isDue;if(isDue)rentEntryMonthChanged()}
+function rentEntryMonthChanged(){let person=db.rentPeople.find(x=>x.id===$('rentEntryPerson').value),month=$('rentEntryMonth').value;if(month&&$('rentEntryType').value==='due'){$('rentEntryDetails').value=month;if(person&&Number(person.monthly)>0&&!$('rentEntryEditId').value)$('rentEntryAmount').value=person.monthly}}
+async function saveRentEntry(){let id=$('rentEntryEditId').value,personId=$('rentEntryPerson').value,amount=Number($('rentEntryAmount').value),date=$('rentEntryDate').value,entryType=$('rentEntryType').value,month=$('rentEntryMonth').value;if(!personId||!date||!Number.isFinite(amount)||amount<=0)return alert('Enter a tenant, date, and valid amount.');if(entryType==='due'&&!month)return alert('the month Rent Due, that Month Select an option.');if(entryType==='due'&&db.rentEntries.some(x=>x.id!==id&&x.personId===personId&&x.entryType==='due'&&(x.month||x.details)===month))return alert('Rent due for this tenant and month has already been added.');let old=id?db.rentEntries.find(x=>x.id===id):null,obj={id:id||'RE'+Date.now(),personId,entryType,month:entryType==='due'?month:'',amount,date,details:entryType==='due'?month:$('rentEntryDetails').value.trim(),method:$('rentEntryMethod').value,bank:$('rentEntryBank').value.trim(),ref:$('rentEntryRef').value.trim(),proof:old?.proof||null,proofName:old?.proofName||''};let f=$('rentEntryProof').files[0];if(f){if(f.size>1500000)return alert('File exceeds 1.5 MB. Please choose a smaller file.');if(!(f.type.startsWith('image/')||f.type==='application/pdf'))return alert('Upload an image or PDF only.');obj.proof=await readFile(f);obj.proofName=f.name}if(id){let i=db.rentEntries.findIndex(x=>x.id===id);if(i>=0)db.rentEntries[i]=obj}else db.rentEntries.push(obj);clearRentEntryForm();save()}
+function clearRentEntryForm(){['rentEntryEditId','rentEntryAmount','rentEntryDetails','rentEntryBank','rentEntryRef','rentEntryProof'].forEach(id=>$(id).value='');$('rentEntryType').value='due';$('rentEntryMonth').value=new Date().toISOString().slice(0,7);$('rentEntryMonth').disabled=false;$('rentEntryMethod').value='';$('rentEntryDate').value=localDateTime();$('rentEntryProofCurrent').textContent='Proof file is optional'}
+function editRentEntry(id){let x=db.rentEntries.find(x=>x.id===id);if(!x)return;$('rentEntryEditId').value=x.id;$('rentEntryPerson').value=x.personId;$('rentEntryType').value=x.entryType;$('rentEntryMonth').value=x.month||(/^\d{4}-\d{2}$/.test(x.details||'')?x.details:'');$('rentEntryMonth').disabled=x.entryType!=='due';$('rentEntryAmount').value=x.amount;$('rentEntryDate').value=x.date;$('rentEntryDetails').value=x.details||'';$('rentEntryMethod').value=x.method||'';$('rentEntryBank').value=x.bank||'';$('rentEntryRef').value=x.ref||'';$('rentEntryProof').value='';$('rentEntryProofCurrent').innerHTML=x.proof?`<a href="${x.proof}" target="_blank">📎 ${esc(x.proofName||'View Proof')}</a>`:'Proof file is optional';show('rentLedger');window.scrollTo(0,0)}
+function deleteRentEntry(id){if(confirm('Delete this rent entry?')){db.rentEntries=db.rentEntries.filter(x=>x.id!==id);save()}}
+function viewRentProof(id){let x=db.rentEntries.find(x=>x.id===id);if(x?.proof){let a=document.createElement('a');a.href=x.proof;a.target='_blank';a.click()}}
+function addBank(){let name=$('bankName').value.trim();if(!name)return alert('Enter a bank name.');if(db.banks.some(x=>x.toLowerCase()===name.toLowerCase()))return alert('This bank already exists.');db.banks.push(name);$('bankName').value='';save()}
+function editBank(oldName){let name=prompt('Edit Bank Name',oldName);if(name===null)return;name=name.trim();if(!name)return alert('Bank name cannot be blank.');if(db.banks.some(x=>x.toLowerCase()===name.toLowerCase()&&x!==oldName))return alert('This bank already exists.');db.banks=db.banks.map(x=>x===oldName?name:x);save()}
+function deleteBank(name){if(confirm(name+' Remove this from the list?')){db.banks=db.banks.filter(x=>x!==name);save()}}
+function saveFlat(){let id=$('flatEditId').value,flat=$('flatNo').value.trim();if(!flat)return alert('Flat Number is required.');if(db.flats.some(f=>f.flat.toLowerCase()===flat.toLowerCase()&&f.id!==id))return alert('This flat number already exists.');let obj={id:id||'F'+Date.now(),flat,owner:$('flatOwner').value.trim(),phone:$('flatPhone').value.trim(),floor:$('flatFloor').value.trim(),area:Number($('flatArea').value)||0,charge:Number($('flatCharge').value)||0,opening:Number($('flatOpening').value)||0,active:true};if(id){let i=db.flats.findIndex(f=>f.id===id);if(i>=0)db.flats[i]=obj}else db.flats.push(obj);clearFlatForm();save()}
+function clearFlatForm(){['flatEditId','flatNo','flatOwner','flatPhone','flatFloor','flatArea','flatCharge','flatOpening'].forEach(id=>$(id).value='')}
+function editFlat(id){let f=db.flats.find(x=>x.id===id);if(!f)return;$('flatEditId').value=f.id;$('flatNo').value=f.flat;$('flatOwner').value=f.owner;$('flatPhone').value=f.phone;$('flatFloor').value=f.floor;$('flatArea').value=f.area;$('flatCharge').value=f.charge;$('flatOpening').value=f.opening;show('flats');window.scrollTo(0,0)}
+function deleteFlat(id){if(db.flatPayments.some(x=>x.flatId===id)||db.flatCharges.some(x=>x.flatId===id)){alert('This flat has records and cannot be deleted.');return}if(confirm('Flat Delete ?')){db.flats=db.flats.filter(x=>x.id!==id);save()}}
+function addFlatPayment(){let id=$('payEditId').value,flatId=$('payFlat').value,amount=Number($('payAmount').value),date=$('payDate').value;if(!flatId||!date||!Number.isFinite(amount)||amount<=0)return alert('Enter a flat, date, and valid amount.');let obj={id:id||'FP'+Date.now(),flatId,amount,date,note:$('payNote').value.trim()};if(id){let i=db.flatPayments.findIndex(x=>x.id===id);if(i>=0)db.flatPayments[i]=obj}else db.flatPayments.push(obj);$('payEditId').value='';$('payAmount').value='';$('payNote').value='';save()}
+function editFlatPayment(id){let p=db.flatPayments.find(x=>x.id===id);if(!p)return;$('payEditId').value=p.id;$('payFlat').value=p.flatId;$('payAmount').value=p.amount;$('payDate').value=p.date;$('payNote').value=p.note||'';show('flatpayments');window.scrollTo(0,0)}
+function editFlatCharge(id){let c=db.flatCharges.find(x=>x.id===id);if(!c)return;let month=prompt('Charge month (YYYY-MM)',c.month);if(month===null)return;let amount=prompt('Charge amount (৳)',c.amount);if(amount===null)return;amount=Number(amount);if(!/^\d{4}-\d{2}$/.test(month)||!Number.isFinite(amount)||amount<0)return alert('Enter a valid month and amount.');c.month=month;c.amount=amount;save()}
+function generateCharges(){let month=$('chargeMonth').value;if(!month)return alert('Select a month.');if(db.flatCharges.some(x=>x.month===month))return alert('Charges for this month have already been generated.');if(!confirm(month+' Generate flat charges for this month?'))return;db.flats.filter(f=>f.active&&f.charge>0).forEach(f=>db.flatCharges.push({id:'FC'+Date.now()+Math.random(),flatId:f.id,month,amount:Number(f.charge)}));save();alert('Monthly charges have been added.')}
+function staffSalaryPaid(id,month=''){return db.salaryPayments.filter(x=>x.staffId===id&&(!month||x.month===month)).reduce((a,x)=>a+Number(x.amount||0),0)}
+function saveStaff(){let id=$('staffEditId').value,name=$('staffName').value.trim();if(!name)return alert('Enter staff name.');let obj={id:id||'OS'+Date.now(),name,role:$('staffRole').value.trim(),phone:$('staffPhone').value.trim(),monthly:Number($('staffMonthly').value)||0,join:$('staffJoin').value,info:$('staffInfo').value.trim()};if(id){let i=db.officeStaff.findIndex(x=>x.id===id);if(i>=0)db.officeStaff[i]=obj}else db.officeStaff.push(obj);clearStaffForm();save()}
+function clearStaffForm(){['staffEditId','staffName','staffRole','staffPhone','staffMonthly','staffJoin','staffInfo'].forEach(id=>$(id).value='')}
+function editStaff(id){let x=db.officeStaff.find(x=>x.id===id);if(!x)return;$('staffEditId').value=x.id;$('staffName').value=x.name;$('staffRole').value=x.role||'';$('staffPhone').value=x.phone||'';$('staffMonthly').value=x.monthly||0;$('staffJoin').value=x.join||'';$('staffInfo').value=x.info||'';show('officeStaff')}
+function deleteStaff(id){if(db.salaryPayments.some(x=>x.staffId===id))return alert('This staff member has salary records and cannot be deleted.');if(confirm('Delete this staff member?')){db.officeStaff=db.officeStaff.filter(x=>x.id!==id);save()}}
+function saveSalary(){let id=$('salaryEditId').value,staffId=$('salaryStaff').value,month=$('salaryMonth').value,amount=Number($('salaryAmount').value),date=$('salaryDate').value;if(!staffId||!month||!date||!Number.isFinite(amount)||amount<=0)return alert('Select staff, salary month, payment date, and valid amount.');let obj={id:id||'SP'+Date.now(),staffId,month,amount,date,method:$('salaryMethod').value,ref:$('salaryRef').value.trim(),note:$('salaryNote').value.trim()};if(id){let i=db.salaryPayments.findIndex(x=>x.id===id);if(i>=0)db.salaryPayments[i]=obj}else db.salaryPayments.push(obj);clearSalaryForm();save()}
+function clearSalaryForm(){['salaryEditId','salaryStaff','salaryMonth','salaryAmount','salaryDate','salaryRef','salaryNote'].forEach(id=>$(id).value='');$('salaryMethod').value='Cash'}
+function editSalary(id){let x=db.salaryPayments.find(x=>x.id===id);if(!x)return;$('salaryEditId').value=x.id;$('salaryStaff').value=x.staffId;$('salaryMonth').value=x.month;$('salaryAmount').value=x.amount;$('salaryDate').value=x.date;$('salaryMethod').value=x.method||'Cash';$('salaryRef').value=x.ref||'';$('salaryNote').value=x.note||'';show('officeSalary')}
+function deleteSalary(id){if(confirm('Delete this salary payment?')){db.salaryPayments=db.salaryPayments.filter(x=>x.id!==id);save()}}
+
+function addGroupParticipant(){
+  let name=$('ganName').value.trim(), phone=$('ganPhone').value.trim(), role=$('ganRole').value;
+  if(!name)return alert('Participant name is required.');
+  db.groupParticipants=db.groupParticipants||[];
+  db.groupParticipants.push({id:'GP'+Date.now(), name, phone, role});
+  $('ganName').value=''; $('ganPhone').value='';
+  save();
+}
+function changeGroupRole(id, role){
+  let p = db.groupParticipants.find(x=>x.id===id);
+  if(p){ p.role = role; save(); }
+}
+function deleteGroupParticipant(id){
+  if(confirm('Remove this participant from the group?')){
+    db.groupParticipants = db.groupParticipants.filter(x=>x.id!==id);
+    save();
+  }
+}
+
+function render(){
+let inv=db.investments.reduce((s,x)=>s+x.amount,0),rentIncome=db.rentEntries.filter(x=>['advance','partial','received'].includes(x.entryType)).reduce((s,x)=>s+Number(x.amount),0),income=db.transactions.filter(x=>x.type==='income').reduce((s,x)=>s+x.amount,0)+rentIncome,expense=db.transactions.filter(x=>x.type==='expense').reduce((s,x)=>s+x.amount,0),mDue=db.members.reduce((s,m)=>s+memberDue(m),0),flatPaid=db.flatPayments.reduce((s,x)=>s+x.amount,0),fDue=db.flats.reduce((s,f)=>s+flatDue(f),0);
+$('memberCount').textContent=db.members.length;$('investmentTotal').textContent=money(inv);$('memberDueTotal').textContent=money(mDue);$('incomeTotal').textContent=money(income);$('expenseTotal').textContent=money(expense);$('netBalance').textContent=money(inv+income-expense);$('totalFlats').textContent=db.flats.length;$('flatCollection').textContent=money(flatPaid);$('flatOutstanding').textContent=money(fDue);
+$('memberRows').innerHTML=db.members.filter(m=>(m.name+' '+m.phone).toLowerCase().includes(($('memberSearch').value||'').toLowerCase())).map(m=>`<tr><td>${m.photo?`<img class="member-photo" src="${m.photo}" alt="photo">`:'—'}</td><td>${esc(m.id)}</td><td>${esc(m.name)}</td><td>${esc(m.joinDate||'—')}</td><td>${esc(m.phone)}</td><td>${money(m.target)}</td><td>${money(invested(m.id))}</td><td>${money(memberDue(m))}</td><td><button class="secondary" onclick="editMember('${esc(m.id)}')">Edit</button><button class="danger" onclick="deleteMember('${esc(m.id)}')">Delete</button></td></tr>`).join('');
+$('invMember').innerHTML='<option value="">Select Member</option>'+db.members.map(m=>`<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('');
+$('investmentRows').innerHTML=db.investments.slice().reverse().map(x=>`<tr><td>${esc(memberName(x.memberId))}</td><td>${money(x.amount)}</td><td>${esc(x.bank)}</td><td>${esc(x.date.replace('T',' '))}</td><td>${esc(x.method)}</td><td>${esc(x.txn)}</td><td>${x.receipt?`<button class="secondary" onclick="viewReceipt('${x.receipt}','${esc(x.receiptName||'Receipt')}')">View Receipt</button>`:'—'}</td><td><button class="secondary" onclick="editInvestment('${esc(x.id)}')">Edit</button><button class="danger" onclick="deleteInvestment('${esc(x.id)}')">Delete</button></td></tr>`).join('');
+$('dueRows').innerHTML=db.members.map(m=>`<tr><td>${esc(m.name)}</td><td>${money(m.target)}</td><td>${money(invested(m.id))}</td><td>${money(memberDue(m))}</td><td>${m.target<=0?'Target Not Set':memberDue(m)<=0?'Paid':'Due'} <button class="secondary" onclick="editMember('${esc(m.id)}')">Edit</button></td></tr>`).join('');
+$('transactionRows').innerHTML=db.transactions.slice().reverse().map(x=>`<tr><td>${x.type==='income'?'Income':'Expense'}</td><td>${esc(x.category)}</td><td>${esc(x.description)}</td><td>${money(x.amount)}</td><td>${esc(x.bank)}</td><td>${esc(x.date.replace('T',' '))}</td><td>${esc(x.party)}</td><td>${esc(x.paymentMethod||'—')}</td><td>${esc(x.workDetails||'—')}</td><td>${x.receipt?`<button class="secondary" onclick="viewTransactionReceipt('${esc(x.id)}')">View</button>`:'—'}</td><td><button class="secondary" onclick="editTransaction('${esc(x.id)}')">Edit</button><button class="danger" onclick="deleteTransaction('${esc(x.id)}')">Delete</button></td></tr>`).join('');
+$('wlWorker').innerHTML='<option value="">Select Person</option>'+db.workers.map(w=>`<option value="${esc(w.id)}">${esc(w.type)} — ${esc(w.name)}</option>`).join('');
+$('workerSummaryRows').innerHTML=db.workers.map(w=>{let t=workerTotals(w.id);return `<tr><td>${esc(w.type)}</td><td>${esc(w.name)}<br><small>${esc(w.phone||'')}</small></td><td>${money(t.bill)}</td><td>${money(t.paid)}</td><td><b>${money(t.bill-t.paid)}</b></td><td><button class="secondary" onclick="editWorker('${esc(w.id)}')">Edit</button><button class="danger" onclick="deleteWorker('${esc(w.id)}')">Delete</button></td></tr>`}).join('');
+const renderWorkerTypeList=(type,id)=>$(id).innerHTML=db.workers.filter(w=>w.type===type).map(w=>{let t=workerTotals(w.id);return `<tr><td>${esc(w.name)}</td><td>${esc(w.phone||'—')}</td><td>${esc(w.info||'—')}</td><td>${money(t.bill)}</td><td>${money(t.paid)}</td><td><b>${money(t.bill-t.paid)}</b></td><td><button class="secondary" onclick="editWorker('${esc(w.id)}')">Edit</button><button class="danger" onclick="deleteWorker('${esc(w.id)}')">Delete</button></td></tr>`}).join('')||'<tr><td colspan="7">No records found.</td></tr>';
+renderWorkerTypeList('Labour','labourListRows');renderWorkerTypeList('Contractor','contractorListRows');renderWorkerTypeList('Engineer','engineerListRows');renderWorkerTypeList('Other','otherListRows');
+$('workerEntryRows').innerHTML=db.workerEntries.slice().reverse().map(x=>`<tr><td>${esc((x.date||'').replace('T',' '))}</td><td>${esc(workerName(x.workerId))}</td><td>${({bill:'Bill Added',advance:'Advance Paid',partial:'Partial Payment',payment:'Full / Other Payment'})[x.entryType]||'Paid'}</td><td>${money(x.amount)}</td><td>${esc(x.method||'—')}</td><td>${esc(x.bank||'—')}</td><td>${esc(x.details||'—')}</td><td>${x.proof?`<button class="secondary" onclick="viewWorkerProof('${esc(x.id)}')">View</button>`:'—'}</td><td><button class="secondary" onclick="editWorkerEntry('${esc(x.id)}')">Edit</button><button class="danger" onclick="deleteWorkerEntry('${esc(x.id)}')">Delete</button></td></tr>`).join('');
+$('rentEntryPerson').innerHTML='<option value="">Select Tenant</option>'+db.rentPeople.map(x=>`<option value="${esc(x.id)}">${esc(x.type)} — ${esc(x.name)} (${esc(x.unit||'')})</option>`).join('');$('rentEntryPerson').onchange=rentEntryMonthChanged;
+$('rentSummaryRows').innerHTML=db.rentPeople.map(x=>{let t=rentTotals(x.id);return `<tr><td>${esc(x.type)}</td><td>${esc(x.name)}<br><small>${esc(x.phone||'')}</small></td><td>${esc(x.unit||'—')}</td><td>${money(x.monthly)}</td><td>${money(t.openingDue)}</td><td>${money(t.due)}<br><small>Total Charged Including Previous Due</small><br><small>${t.months?`${t.months} months as per agreement`:'Manual Entry'}</small></td><td>${money(t.received)}</td><td><b>${money(t.balance)}</b>${t.credit?`<br><small>Advance Credit: ${money(t.credit)}</small>`:''}</td><td>${x.contract?`<button class="secondary" onclick="viewRentContract('${esc(x.id)}')">View</button>`:'—'}</td><td><button class="secondary" onclick="editRentPerson('${esc(x.id)}')">Edit</button><button class="danger" onclick="deleteRentPerson('${esc(x.id)}')">Delete</button></td></tr>`}).join('');
+$('rentEntryRows').innerHTML=db.rentEntries.slice().reverse().map(x=>`<tr><td>${esc((x.date||'').replace('T',' '))}</td><td>${esc(rentPersonName(x.personId))}</td><td>${({due:'Monthly Rent Charged',advance:'Advance Rent Received',partial:'Partial Rent Received',received:'Rent Received / Full Payment'})[x.entryType]||'Rent Entry'}</td><td>${money(x.amount)}</td><td>${esc(x.details||'—')}</td><td>${esc(x.method||'—')}</td><td>${esc(x.bank||'—')}</td><td>${x.proof?`<button class="secondary" onclick="viewRentProof('${esc(x.id)}')">View</button>`:'—'}</td><td><button class="secondary" onclick="editRentEntry('${esc(x.id)}')">Edit</button><button class="danger" onclick="deleteRentEntry('${esc(x.id)}')">Delete</button></td></tr>`).join('');
+$('salaryStaff').innerHTML='<option value="">Select Staff</option>'+db.officeStaff.map(x=>`<option value="${esc(x.id)}">${esc(x.name)} — ${esc(x.role||'')}</option>`).join('');
+let staffQ=($('staffSearch')?.value||'').toLowerCase();$('staffRows').innerHTML=db.officeStaff.filter(x=>(x.name+' '+x.role+' '+x.phone).toLowerCase().includes(staffQ)).map(x=>{let currentMonth=new Date().toISOString().slice(0,7),paid=staffSalaryPaid(x.id,currentMonth),due=Math.max(0,Number(x.monthly||0)-paid);return `<tr><td>${esc(x.name)}</td><td>${esc(x.role||'—')}</td><td>${esc(x.phone||'—')}</td><td>${money(x.monthly)}</td><td>${money(paid)}</td><td>${money(due)}</td><td><button class="secondary" onclick="editStaff('${esc(x.id)}')">Edit</button><button class="danger" onclick="deleteStaff('${esc(x.id)}')">Delete</button></td></tr>`}).join('')||'<tr><td colspan="7">No office staff found.</td></tr>';
+$('salaryRows').innerHTML=db.salaryPayments.slice().reverse().map(x=>`<tr><td>${esc(x.month)}</td><td>${esc(db.officeStaff.find(s=>s.id===x.staffId)?.name||'Unknown Staff')}</td><td>${money(x.amount)}</td><td>${esc(x.date)}</td><td>${esc(x.method||'—')}</td><td>${esc(x.ref||'—')}</td><td>${esc(x.note||'—')}</td><td><button class="secondary" onclick="editSalary('${esc(x.id)}')">Edit</button><button class="danger" onclick="deleteSalary('${esc(x.id)}')">Delete</button></td></tr>`).join('');
+$('bankRows').innerHTML=db.banks.map(b=>`<tr><td>${esc(b)}</td><td><button class="secondary" onclick="editBank('${esc(b)}')">Edit</button><button class="danger" onclick="deleteBank('${esc(b)}')">Remove</button></td></tr>`).join('');$('bankOptions').innerHTML=db.banks.map(b=>`<option value="${esc(b)}">`).join('');
+let q=($('flatSearch').value||'').toLowerCase();$('flatRows').innerHTML=db.flats.filter(f=>(f.flat+' '+f.owner+' '+f.phone).toLowerCase().includes(q)).map(f=>`<tr><td>${esc(f.flat)}</td><td>${esc(f.owner)}</td><td>${esc(f.phone)}</td><td>${esc(f.floor)}</td><td>${money(f.charge)}</td><td>${money(flatDue(f))}</td><td><button class="secondary" onclick="editFlat('${esc(f.id)}')">Edit</button><button class="danger" onclick="deleteFlat('${esc(f.id)}')">Delete</button></td></tr>`).join('');
+$('payFlat').innerHTML='<option value="">Select Flat</option>'+db.flats.map(f=>`<option value="${esc(f.id)}">${esc(f.flat)} - ${esc(f.owner||'No Owner')}</option>`).join('');
+$('flatPaymentRows').innerHTML=db.flatPayments.slice().reverse().map(p=>`<tr><td>${esc(p.date)}</td><td>${esc(db.flats.find(f=>f.id===p.flatId)?.flat||'')}</td><td>${money(p.amount)}</td><td>${esc(p.note)}</td><td><button class="secondary" onclick="editFlatPayment('${esc(p.id)}')">Edit</button></td></tr>`).join('');
+$('chargeRows').innerHTML=db.flatCharges.slice().reverse().map(c=>`<tr><td>${esc(c.month)}</td><td>${esc(db.flats.find(f=>f.id===c.flatId)?.flat||'')}</td><td>${money(c.amount)}</td><td><button class="secondary" onclick="editFlatCharge('${esc(c.id)}')">Edit</button></td></tr>`).join('');
+$('reportSummary').innerHTML=`<h3>Member & Association Accounts</h3><p>Total Members: <b>${db.members.length}</b></p><p>Member Investment / Capital Receipt (not Income): <b>${money(inv)}</b></p><p>Total Member Due: <b>${money(mDue)}</b></p><p>Other Income (including Shop, Parking, Building, and Flat Rent): <b>${money(income)}</b></p><p>Rent Received (separate rent ledger): <b>${money(rentIncome)}</b></p><p>Total Expense: <b>${money(expense)}</b></p><p>Net Account Balance: <b>${money(inv+income-expense)}</b></p><hr><h3>Separate Flat Accounts</h3><p>Total Flats: <b>${db.flats.length}</b></p><p>Flat Payments: <b>${money(flatPaid)}</b></p><p>Flat Outstanding: <b>${money(fDue)}</b></p>`;
+
+  db.groupParticipants=db.groupParticipants||[];
+  $('groupParticipantRows').innerHTML=db.groupParticipants.map(p=>{
+    let badgeCls = p.role==='Owner'?'background:#d1e7dd;color:#0f5132':(p.role==='Admin'?'background:#cff4fc;color:#055160':'background:#f8d7da;color:#842029');
+    let icon = p.role==='Owner'?'👑':(p.role==='Admin'?'🛡️':'👤');
+    return `<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.phone||'—')}</td><td><span style="padding:4px 8px;border-radius:12px;font-size:11px;font-weight:bold;display:inline-block;${badgeCls}">${icon} ${esc(p.role)}</span></td><td><select onchange="changeGroupRole('${esc(p.id)}',this.value)" style="width:auto;padding:4px;margin:0;"><option value="Member" ${p.role==='Member'?'selected':''}>Member</option><option value="Admin" ${p.role==='Admin'?'selected':''}>Admin</option><option value="Owner" ${p.role==='Owner'?'selected':''}>Owner</option></select> <button class="danger" style="padding:4px 8px;" onclick="deleteGroupParticipant('${esc(p.id)}')">Remove</button></td></tr>`;
+  }).join('') || '<tr><td colspan="4">No participants found.</td></tr>';
+  
+  renderReports();
+}
+function clearReportFilters(){['reportSearch','reportMonth','reportFrom','reportTo'].forEach(id=>$(id).value='');$('reportType').value='all';renderReports()}
+function reportDate(x){return String(x||'').slice(0,10)}
+function renderReports(){
+ const type=$('reportType')?.value||'all',q=($('reportSearch')?.value||'').trim().toLowerCase(),month=$('reportMonth')?.value||'',from=$('reportFrom')?.value||'',to=$('reportTo')?.value||'';
+ let rows=[];
+ const add=(kind,date,name,detail,amount,status='')=>rows.push({kind,date:reportDate(date),name:name||'—',detail:detail||'—',amount:Number(amount||0),status});
+ if(type==='all'||type==='member') db.members.forEach(m=>{if(type==='member')add('Member',m.joinDate,m.name,`Target ${money(m.target)} | Received ${money(invested(m.id))}`,invested(m.id),`Due ${money(memberDue(m))}`)});
+ if(type==='all'||type==='investment') db.investments.forEach(x=>add('Investment',x.date,memberName(x.memberId),`Bank: ${x.bank||'—'} | Method: ${x.method||'—'} | ${x.note||''}`,x.amount,'Received'));
+ if(type==='all'||type==='income'||type==='expense') db.transactions.filter(x=>type==='all'||x.type===type).forEach(x=>add(x.type==='income'?'Income':'Expense',x.date,x.party||x.description,`${x.category||''} | ${x.description||''} | ${x.workDetails||''}`,x.amount,x.type==='income'?'Received':'Paid'));
+ if(type==='all'||type==='rent') db.rentEntries.forEach(x=>add('Rent '+({due:'Charged',advance:'Advance Received',partial:'Partial Received',received:'Rent Received'}[x.entryType]||''),x.date,rentPersonName(x.personId),`${x.month||x.details||''} | ${x.bank||''}`,x.amount,x.entryType==='due'?'Due Add':'Payment Received'));
+ if(type==='all'||type==='rent'||type==='tenantlist') db.rentPeople.forEach(x=>{if(type==='rent'||type==='tenantlist') {let t=rentTotals(x.id);add(type==='tenantlist'?'Tenant List':'Rent Summary',x.start,x.name,`${x.type} ${x.unit||''} | Phone ${x.phone||'—'} | Monthly ${money(x.monthly)} | Total Due ${money(t.due)} | Received ${money(t.received)}`,t.balance,`Outstanding ${money(t.balance)}`)}});
+ if(type==='all'||type==='worker'||type.startsWith('worker-')) db.workerEntries.filter(x=>type==='worker'||type==='all'||db.workers.find(w=>w.id===x.workerId)?.type===type.slice(7)).forEach(x=>{let w=db.workers.find(w=>w.id===x.workerId);add((w?.type||'Work')+' '+({bill:'Bill',advance:'Advance',partial:'Partial Payment',payment:'Payment'}[x.entryType]||''),x.date,workerName(x.workerId),`${x.details||''} | ${x.bank||''}`,x.amount,x.entryType==='bill'?'Bill':'Paid')});
+if(type.startsWith('worker-')) db.workers.filter(w=>w.type===type.slice(7)).forEach(w=>{let t=workerTotals(w.id);add(w.type+' Summary','',w.name,`Phone ${w.phone||'—'} | Total Bills ${money(t.bill)} | Total Paid ${money(t.paid)}`,t.bill-t.paid,'Outstanding')});
+ if(type==='all'||type==='salary'||type==='stafflist') {if(type==='all'||type==='salary')db.salaryPayments.forEach(x=>add('Office Staff Salary',x.date,db.officeStaff.find(s=>s.id===x.staffId)?.name||'Unknown Staff',`Month ${x.month} | ${x.method||''} | ${x.ref||''} | ${x.note||''}`,x.amount,'Paid'));if(type==='stafflist')db.officeStaff.forEach(x=>add('Office Staff',x.join,x.name,`Designation ${x.role||'—'} | Phone ${x.phone||'—'} | Monthly Salary ${money(x.monthly)}`,x.monthly,'Staff'))}
+ if(type==='all'||type==='flat') {db.flatPayments.forEach(x=>{let f=db.flats.find(f=>f.id===x.flatId);add('Flat Collection',x.date,f?.owner||f?.flat,`${f?.flat||''} | ${x.note||''}`,x.amount,'Collected')});db.flatCharges.forEach(x=>{let f=db.flats.find(f=>f.id===x.flatId);add('Service Charge',x.month+'-01',f?.owner||f?.flat,`${f?.flat||''} | Month ${x.month}`,x.amount,'Charged')});}
+ rows=rows.filter(x=>(!q||(x.name+' '+x.detail+' '+x.kind).toLowerCase().includes(q))&&(!month||x.date.startsWith(month))&&(!from||x.date>=from)&&(!to||x.date<=to)).sort((a,b)=>b.date.localeCompare(a.date));
+ let totalIn=0,totalOut=0;rows.forEach(x=>{if(/Income|Investment|Received|Collected/.test(x.kind)||x.status==='Received'||x.status==='Received')totalIn+=x.amount;else totalOut+=x.amount});
+ $('reportSummary').innerHTML=`<h3>${$('reportType').selectedOptions[0].textContent}</h3><div class="cards"><div class="card"><small>Total Records</small><h2>${rows.length}</h2></div><div class="card"><small>Total Received / Income / Collections</small><h2>${money(totalIn)}</h2></div><div class="card"><small>Total Expenses / Bills / Charges</small><h2>${money(totalOut)}</h2></div><div class="card"><small>Difference</small><h2>${money(totalIn-totalOut)}</h2></div></div><p>Search: ${q?esc(q):'All Names'} | ${month||((from||to)?`${from||'Start'} to ${to||'End'}`:'All Dates')}</p>`;
+ $('reportTableTitle').textContent='Detailed Records ('+rows.length+' records)';$('reportHead').innerHTML='<tr><th>Type</th><th>Date</th><th>Name</th><th>Description</th><th>Amount</th><th>Status</th></tr>';
+ $('reportRows').innerHTML=rows.map(x=>`<tr><td>${esc(x.kind)}</td><td>${esc(x.date||'—')}</td><td>${esc(x.name)}</td><td>${esc(x.detail)}</td><td>${money(x.amount)}</td><td>${esc(x.status)}</td></tr>`).join('')||'<tr><td colspan="6">No records found for these filters.</td></tr>';
+ window.currentReportRows=rows;
+}
+function exportReportCSV(){let rows=window.currentReportRows||[],data=[['Type','Date','Name','Description','Amount','Status'],...rows.map(x=>[x.kind,x.date,x.name,x.detail,x.amount,x.status])],csv='\uFEFF'+data.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='Hilton-Tower-Report.csv';a.click();URL.revokeObjectURL(a.href)}
+const ADMIN_AUTH_KEY='hiltonTowerAdminAuthV1';
+async function hashAdminPassword(password,salt){const enc=new TextEncoder();const key=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveBits']);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:Uint8Array.from(atob(salt),c=>c.charCodeAt(0)),iterations:180000,hash:'SHA-256'},key,256);return btoa(String.fromCharCode(...new Uint8Array(bits)))}
+function randomAdminSalt(){let b=new Uint8Array(16);crypto.getRandomValues(b);return btoa(String.fromCharCode(...b))}
+async function handleAdminLogin(){const p=$('loginPassword').value,confirmP=$('loginConfirm').value,msg=$('loginMessage');try{if(!window.crypto?.subtle)throw new Error('Secure password storage is not supported by this browser. Please use an updated Chrome browser.');let saved=localStorage.getItem(ADMIN_AUTH_KEY);if(!saved){if(p.length<8){msg.textContent='Password must be at least 8 characters.';return}if(p!==confirmP){msg.textContent='Passwords do not match.';return}let salt=randomAdminSalt(),hash=await hashAdminPassword(p,salt);localStorage.setItem(ADMIN_AUTH_KEY,JSON.stringify({loginId:'admin',salt,hash}));msg.textContent='Password saved. Opening software...'}else{let auth=JSON.parse(saved),hash=await hashAdminPassword(p,auth.salt);if(p.length===0||hash!==auth.hash){msg.textContent='Incorrect password.';return}msg.textContent='Login successful...'}document.body.classList.remove('login-locked');$('loginGate').style.display='none';$('loginPassword').value='';$('loginConfirm').value=''}catch(e){msg.textContent=e.message||'Could not save password in this browser.'}}
+(function initAdminLogin(){let exists=localStorage.getItem(ADMIN_AUTH_KEY);if(exists){$('loginIntro').textContent='Admin Login';$('loginHelp').innerHTML='Enter your admin password. Login ID: <b>admin</b>';$('loginPassword').placeholder='Admin password';$('loginPassword').autocomplete='current-password';$('loginConfirm').style.display='none';$('loginAction').textContent='Login'}})();
+function exportBackup(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Hilton-Tower-Full-Backup.json';a.click();URL.revokeObjectURL(a.href)}
+function importBackup(event){let file=event.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x||!Array.isArray(x.members)||!Array.isArray(x.flats))throw new Error('Invalid');if(!confirm('The backup will replace the current data. Have you backed up your current data first?'))return;db={...fresh(),...x};save();alert('Backup restored successfully.')}catch(e){alert('The backup file is invalid.')}event.target.value=''};r.readAsText(file)}
+function exportCSV(){let rows=[['Member ID','Name','Join Date','Phone','Address','Target','Invested','Due'],...db.members.map(m=>[m.id,m.name,m.joinDate,m.phone,m.address,m.target,invested(m.id),memberDue(m)])];let csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='Hilton-Tower-Members.csv';a.click();URL.revokeObjectURL(a.href)}
+clearMemberForm();$('invDate').value=localDateTime();$('txDate').value=localDateTime();$('wlDate').value=localDateTime();$('salaryDate').value=new Date().toISOString().slice(0,10);$('salaryMonth').value=new Date().toISOString().slice(0,7);$('rentEntryDate').value=localDateTime();$('payDate').value=new Date().toISOString().slice(0,10);$('chargeMonth').value=new Date().toISOString().slice(0,7);
+render();
+</script>
+</body>
+</html>
